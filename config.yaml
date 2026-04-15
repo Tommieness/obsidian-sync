@@ -1,0 +1,13 @@
+obsidian:
+  vault_path: "/Users/tommiesexton/Library/CloudStorage/OneDrive-Personal/Documents/Obsidian Vault"
+  exclude_dirs:
+    - ".obsidian"
+    - ".trash"
+  exclude_patterns:
+    - "*.excalidraw.md"
+openwebui:
+  url: "http://localhost:3000"
+  collection_name: "Obsidian Vault"
+sync:
+  state_file: ".sync_state.json"
+  delete_removed_files: true
