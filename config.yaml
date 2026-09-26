@@ -1,5 +1,10 @@
 obsidian:
   vault_path: "/Users/tommiesexton/Library/CloudStorage/OneDrive-Personal/Agent Build"
+  # Only these notes and folders are shared with Open WebUI. Everything else stays out.
+  include_paths:
+    - "LAB.md"
+    - "wiki"
+    - "schema"
   exclude_dirs:
     - ".obsidian"
     - ".trash"

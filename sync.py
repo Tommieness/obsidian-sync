@@ -44,10 +44,18 @@ class SyncState:
 
 def sha256(text): return hashlib.sha256(text.encode()).hexdigest()
 
-def scan_vault(vault, exclude_dirs, exclude_patterns):
+def is_allowed(rel, include_paths):
+    # A note is synced only if it is listed exactly, or sits inside a listed folder.
+    for p in include_paths:
+        p = p.strip("/")
+        if rel == p or rel.startswith(p + "/"): return True
+    return False
+
+def scan_vault(vault, exclude_dirs, exclude_patterns, include_paths):
     files = {}
     for md in vault.rglob("*.md"):
         rel = str(md.relative_to(vault))
+        if not is_allowed(rel, include_paths): continue
         if any(p in exclude_dirs for p in Path(rel).parts[:-1]): continue
         if any(fnmatch.fnmatch(rel, pat) for pat in exclude_patterns): continue
         try: files[rel] = md.read_text(encoding="utf-8")
@@ -60,6 +68,10 @@ def run_sync(config, dry_run=False):
     vault = Path(config["obsidian"]["vault_path"]).expanduser().resolve()
     exclude_dirs = config["obsidian"].get("exclude_dirs", [".obsidian", ".trash"])
     exclude_patterns = config["obsidian"].get("exclude_patterns", [])
+    include_paths = config["obsidian"].get("include_paths") or []
+    if not include_paths:
+        # Closed by default: with no allowlist, nothing is shared.
+        raise ValueError("No include_paths in config.yaml, so nothing will be synced. List the notes or folders to share.")
     owui_url = config["openwebui"]["url"]
     api_key = os.environ.get("OPENWEBUI_API_KEY") or config["openwebui"].get("api_key")
     collection_name = config["openwebui"].get("collection_name", "Obsidian Vault")
@@ -72,8 +84,9 @@ def run_sync(config, dry_run=False):
         collection = client.get_or_create_knowledge(collection_name)
         kid = collection["id"]
     else: kid = "dry-run"
-    local = scan_vault(vault, exclude_dirs, exclude_patterns)
+    local = scan_vault(vault, exclude_dirs, exclude_patterns, include_paths)
     print(f"Vault: {vault}  ({len(local)} files)")
+    print(f"Allowed: {', '.join(include_paths)}")
     print(f"Collection: {collection_name!r}")
     changes = 0
     prefix = "[dry-run] " if dry_run else ""
