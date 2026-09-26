@@ -13,7 +13,11 @@ class OpenWebUIClient:
         except requests.HTTPError: raise RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
         return r
     def list_knowledge(self):
-        return self._check(self.session.get(f"{self.base}/api/v1/knowledge/")).json()
+        data = self._check(self.session.get(f"{self.base}/api/v1/knowledge/")).json()
+        # Newer Open WebUI versions wrap the list, e.g. {"items": [...], "total": n}.
+        if isinstance(data, dict):
+            data = data.get("items") or data.get("data") or []
+        return data
     def create_knowledge(self, name):
         return self._check(self.session.post(f"{self.base}/api/v1/knowledge/create", json={"name": name, "description": ""})).json()
     def get_or_create_knowledge(self, name):
