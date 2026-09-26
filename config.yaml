@@ -1,5 +1,5 @@
 obsidian:
-  vault_path: "/Users/tommiesexton/Library/CloudStorage/OneDrive-Personal/Documents/Obsidian Vault"
+  vault_path: "/Users/tommiesexton/Library/CloudStorage/OneDrive-Personal/Agent Build"
   exclude_dirs:
     - ".obsidian"
     - ".trash"
